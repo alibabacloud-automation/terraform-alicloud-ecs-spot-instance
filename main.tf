@@ -56,6 +56,7 @@ module "ecs-instance" {
   tags              = var.tags
   resource_group_id = var.resource_group_id
   user_data         = var.user_data
+  description       = "An ECS instance create by terraform module terraform-alicloud-ecs-spot-instance"
 
   // Specify instance charge attributes
   internet_charge_type        = var.internet_charge_type
