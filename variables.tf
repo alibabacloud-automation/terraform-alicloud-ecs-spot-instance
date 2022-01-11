@@ -9,6 +9,7 @@ variable "profile" {
   type        = string
   default     = ""
 }
+
 variable "shared_credentials_file" {
   description = "(Deprecated from version 1.1.0) This is the path to the shared credentials file. If this is not set and a profile is specified, $HOME/.aliyun/config.json will be used."
   type        = string
@@ -19,6 +20,31 @@ variable "skip_region_validation" {
   description = "(Deprecated from version 1.1.0) Skip staticvalidation of region ID. Used by users of alternative AlibabaCloud-like APIs or users w/ access to regions that are not public (yet)."
   type        = bool
   default     = false
+}
+
+# InstanceTypes data source variables
+variable "instance_type_family" {
+  description = "The instance type family used to retrieve bare metal CPU instance type."
+  type        = string
+  default     = ""
+}
+
+variable "instance_charge_type" {
+  description = "The charge type of instance. Choices are 'PostPaid' and 'PrePaid'."
+  type        = string
+  default     = "PostPaid"
+}
+
+variable "cpu_core_count" {
+  description = "core count used to retrieve instance types."
+  type        = number
+  default     = 1
+}
+
+variable "memory_size" {
+  description = "Memory size used to retrieve instance types."
+  type        = number
+  default     = 2
 }
 
 # Images data source variables
@@ -37,7 +63,7 @@ variable "owners" {
 variable "image_name_regex" {
   description = "A regex string to filter resulting images by name."
   type        = string
-  default     = "^ubuntu_18.*64"
+  default     = ""
 }
 
 # Ecs instance variables
@@ -59,93 +85,15 @@ variable "image_ids" {
   default     = []
 }
 
-variable "instance_type_family" {
-  description = "The instance type family used to retrieve bare metal CPU instance type."
-  type        = string
-  default     = "ecs.ebmc6"
-}
-
 variable "instance_type" {
   description = "The instance type used to launch one or more ecs instances."
   type        = string
   default     = ""
 }
 
-variable "cpu_core_count" {
-  description = "core count used to retrieve instance types."
-  type        = number
-  default     = 0
-}
-
-variable "memory_size" {
-  description = "Memory size used to retrieve instance types."
-  type        = number
-  default     = 0
-}
-
 variable "security_group_ids" {
   description = "A list of security group ids to associate with."
   type        = list(string)
-  default     = []
-}
-
-variable "instance_name" {
-  description = "Name used on all instances as prefix. Like TF-ECS-Instance-1, TF-ECS-Instance-2."
-  type        = string
-  default     = "TF-ECS-Instance"
-}
-
-variable "resource_group_id" {
-  description = "The Id of resource group which the instance belongs."
-  type        = string
-  default     = ""
-}
-
-variable "internet_charge_type" {
-  description = "The internet charge type of instance. Choices are 'PayByTraffic' and 'PayByBandwidth'."
-  type        = string
-  default     = "PayByTraffic"
-}
-
-variable "host_name" {
-  description = "Host name used on all instances as prefix. Like TF-ECS-Host-Name-1, TF-ECS-Host-Name-2."
-  type        = string
-  default     = ""
-}
-
-variable "password" {
-  description = "The password of instance."
-  type        = string
-  default     = ""
-}
-
-variable "kms_encrypted_password" {
-  description = "An KMS encrypts password used to an instance. It is conflicted with 'password'."
-  type        = string
-  default     = ""
-}
-
-variable "kms_encryption_context" {
-  description = "An KMS encryption context used to decrypt 'kms_encrypted_password' before creating or updating an instance with 'kms_encrypted_password'."
-  type        = map(string)
-  default     = {}
-}
-
-variable "system_disk_category" {
-  description = "The system disk category used to launch one or more ecs instances."
-  type        = string
-  default     = "cloud_efficiency"
-}
-
-variable "system_disk_size" {
-  description = "The system disk size used to launch one or more ecs instances."
-  type        = number
-  default     = 40
-}
-
-variable "data_disks" {
-  description = "Additional data disks to attach to the scaled ECS instance."
-  type        = list(map(string))
   default     = []
 }
 
@@ -173,10 +121,52 @@ variable "private_ips" {
   default     = []
 }
 
+variable "instance_name" {
+  description = "Name used on all instances as prefix. Like TF-ECS-Instance-1, TF-ECS-Instance-2."
+  type        = string
+  default     = ""
+}
+
+variable "use_num_suffix" {
+  description = "Always append numerical suffix(like 001, 002 and so on) to instance name and host name, even if number_of_instances is 1."
+  type        = bool
+  default     = false
+}
+
+variable "tags" {
+  description = "A mapping of tags to assign to the resource."
+  type        = map(string)
+  default     = {}
+}
+
+variable "resource_group_id" {
+  description = "The Id of resource group which the instance belongs."
+  type        = string
+  default     = ""
+}
+
+variable "user_data" {
+  description = "User data to pass to instance on boot."
+  type        = string
+  default     = ""
+}
+
+variable "description" {
+  description = "Description of all instances."
+  type        = string
+  default     = ""
+}
+
+variable "internet_charge_type" {
+  description = "The internet charge type of instance. Choices are 'PayByTraffic' and 'PayByBandwidth'."
+  type        = string
+  default     = "PayByTraffic"
+}
+
 variable "internet_max_bandwidth_out" {
   description = "The maximum internet out bandwidth of instance."
   type        = number
-  default     = 0
+  default     = 10
 }
 
 variable "associate_public_ip_address" {
@@ -191,20 +181,56 @@ variable "dry_run" {
   default     = false
 }
 
-variable "user_data" {
-  description = "User data to pass to instance on boot."
+variable "system_disk_category" {
+  description = "The system disk category used to launch one or more ecs instances."
+  type        = string
+  default     = "cloud_efficiency"
+}
+
+variable "system_disk_size" {
+  description = "The system disk size used to launch one or more ecs instances."
+  type        = number
+  default     = 20
+}
+
+variable "data_disks" {
+  description = "Additional data disks to attach to the scaled ECS instance."
+  type        = list(map(string))
+  default     = []
+}
+
+variable "volume_tags" {
+  description = "A mapping of tags to assign to the devices created by the instance at launch time."
+  type        = map(string)
+  default     = {}
+}
+
+variable "password" {
+  description = "The password of instance."
+  type        = string
+  default     = ""
+}
+
+variable "kms_encrypted_password" {
+  description = "An KMS encrypts password used to an instance. It is conflicted with 'password'."
+  type        = string
+  default     = ""
+}
+
+variable "kms_encryption_context" {
+  description = "An KMS encryption context used to decrypt 'kms_encrypted_password' before creating or updating an instance with 'kms_encrypted_password'."
+  type        = map(string)
+  default     = {}
+}
+
+variable "key_name" {
+  description = "The name of SSH key pair that can login ECS instance successfully without password. If it is specified, the password would be invalid."
   type        = string
   default     = ""
 }
 
 variable "role_name" {
   description = "Instance RAM role name. The name is provided and maintained by RAM. You can use 'alicloud_ram_role' to create a new one."
-  type        = string
-  default     = ""
-}
-
-variable "key_name" {
-  description = "The name of SSH key pair that can login ECS instance successfully without password. If it is specified, the password would be invalid."
   type        = string
   default     = ""
 }
@@ -221,21 +247,6 @@ variable "security_enhancement_strategy" {
   default     = "Active"
 }
 
-variable "tags" {
-  description = "A mapping of tags to assign to the resource."
-  type        = map(string)
-  default = {
-    Created = "Terraform"
-    Source  = "terraform-alicloud-modules/ecs-spot-instance/alicloud"
-  }
-}
-
-variable "volume_tags" {
-  description = "A mapping of tags to assign to the devices created by the instance at launch time."
-  type        = map(string)
-  default     = {}
-}
-
 variable "spot_strategy" {
   description = "The spot strategy of a Pay-As-You-Go instance. Value range:'SpotWithPriceLimit': A price threshold for a spot instance. 'SpotAsPriceGo': A price that is based on the highest Pay-As-You-Go instance"
   type        = string
@@ -246,4 +257,10 @@ variable "spot_price_limit" {
   description = "The hourly price threshold of a instance, and it takes effect only when parameter 'spot_strategy' is 'SpotWithPriceLimit'. Three decimals is allowed at most."
   type        = number
   default     = 0.5
+}
+
+variable "host_name" {
+  description = "Host name used on all instances as prefix. Like TF-ECS-Host-Name-1, TF-ECS-Host-Name-2."
+  type        = string
+  default     = ""
 }
