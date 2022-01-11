@@ -1,6 +1,6 @@
 data "alicloud_instance_types" "this" {
   instance_type_family = var.instance_type_family != "" ? var.instance_type_family : null
-  instance_charge_type = "PostPaid"
+  instance_charge_type = var.instance_charge_type
   cpu_core_count       = var.cpu_core_count > 0 ? var.cpu_core_count : null
   memory_size          = var.memory_size > 0 ? var.memory_size : null
   availability_zone    = length(var.vswitch_ids) > 0 || var.vswitch_id != "" ? data.alicloud_vswitches.this.vswitches.0.zone_id : null
@@ -20,11 +20,6 @@ data "alicloud_images" "this" {
 module "ecs-instance" {
   source = "alibaba/ecs-instance/alicloud"
 
-  region                  = var.region
-  profile                 = var.profile
-  shared_credentials_file = var.shared_credentials_file
-  skip_region_validation  = var.skip_region_validation
-
   number_of_instances = var.number_of_instances
 
   // Specify a ecs image
@@ -41,22 +36,20 @@ module "ecs-instance" {
   private_ip         = var.private_ip
   private_ips        = var.private_ips
 
-
   // Specify instance basic attributes
   name              = var.instance_name
-  use_num_suffix    = true
+  use_num_suffix    = var.use_num_suffix
   tags              = var.tags
   resource_group_id = var.resource_group_id
   user_data         = var.user_data
-  description       = "An ECS instance create by terraform module terraform-alicloud-ecs-spot-instance"
+  description       = var.description
 
   // Specify instance charge attributes
   internet_charge_type        = var.internet_charge_type
   internet_max_bandwidth_out  = var.internet_max_bandwidth_out
   associate_public_ip_address = var.associate_public_ip_address
-  instance_charge_type        = "PostPaid"
+  instance_charge_type        = var.instance_charge_type
   dry_run                     = var.dry_run
-
 
   // Specify instance disk setting
   system_disk_category = var.system_disk_category
@@ -83,4 +76,5 @@ module "ecs-instance" {
   // Set the spot strategy
   spot_strategy    = var.spot_strategy
   spot_price_limit = var.spot_price_limit
+
 }

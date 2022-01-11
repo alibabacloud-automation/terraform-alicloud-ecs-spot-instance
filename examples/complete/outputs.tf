@@ -1,7 +1,6 @@
 ################
 # ECS Instance
 ################
-
 output "this_availability_zone" {
   description = "The zone id of the instance."
   value       = module.ecs_spot_instance.this_availability_zone
