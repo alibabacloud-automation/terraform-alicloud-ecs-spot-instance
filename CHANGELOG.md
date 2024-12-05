@@ -1,4 +1,7 @@
-## 1.2.0 (Unreleased)
+## 1.2.0 (December 5, 2024)
+
+- deprecate [GH-6](https://github.com/alibabacloud-automation/terraform-alicloud-ecs-spot-instance/pull/6)
+
 ## 1.1.0 (December 5, 2021)
 
 ENHANCEMENTS:
